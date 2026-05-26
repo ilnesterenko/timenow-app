@@ -3,30 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sample Web App</title>
+    <title>TimeNow — Live API Service</title>
+    <style>
+        /* Базові стилі та сучасний темний градієнт для фону */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Стильна картка-контейнер */
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Заголовок */
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Адаптивна картинка годинника з м'якою тінню */
+        .clock-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.2);
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover .clock-img {
+            transform: rotate(10deg) scale(1.05);
+        }
+
+        /* Сучасна кнопка з градієнтом та ефектами */
+        .btn-fetch {
+            background: linear-gradient(135deg, #38bdf8 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-fetch:hover {
+            opacity: 0.95;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+            transform: scale(1.01);
+        }
+
+        .btn-fetch:active {
+            transform: scale(0.98);
+        }
+
+        .btn-fetch:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Контейнер виведення результату */
+        .result-container {
+            margin-top: 24px;
+            min-height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .time-display {
+            font-size: 32px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums; /* Щоб цифри не «стрибали» при зміні */
+            color: #38bdf8;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+            margin: 0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .status-msg {
+            color: #94a3b8;
+            font-size: 15px;
+            margin: 0;
+        }
+
+        .error-msg {
+            color: #f87171;
+            font-size: 15px;
+            margin: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
-    <h1>Awersome web site for checking what time is it now</h1>
-    <img src="clock.jpeg" alt="Clock picture" style="width:200px;height:200px;">
-    <button onclick="getData()">Get Time</button>
-    <div id="result"></div>
-    <script>
-        function getData() {
-            // Replace this URL with your backend API endpoint
-            const apiUrl = 'http://localhost:8080/time';
 
-            // Make a GET request to the API
-            fetch(apiUrl)
-                .then(response => response.text())
-                .then(data => {
-                    // Update the result div with the API response
-                    document.getElementById('result').innerHTML = `<p>Time now is: ${data}</p>`;
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                    document.getElementById('result').innerHTML = '<p>Error fetching data</p>';
-                });
-        }
+    <div class="card">
+        <h1>TimeNow Application</h1>
+        <img src="clock.jpeg" alt="Clock illustration" class="clock-img">
+        <button class="btn-fetch" id="fetchBtn" onclick="getData()">Get Current Time</button>
+        
+        <div class="result-container" id="result">
+            <p class="status-msg">Click the button above to check live API time</p>
+        </div>
+    </div>
+
+    <script>
+    function getData() {
+        const apiUrl = '/api/time';
+        const resultDiv = document.getElementById('result');
+        const fetchBtn = document.getElementById('fetchBtn');
+
+        // Блокуємо кнопку та показуємо статус завантаження
+        fetchBtn.disabled = true;
+        resultDiv.innerHTML = '<p class="status-msg">Fetching time from API...</p>';
+
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server returned HTTP ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                // Виводимо гарний великий час
+                resultDiv.innerHTML = `<p class="time-display">${data}</p>`;
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                resultDiv.innerHTML = `<p class="error-msg">⚠️ Error: ${error.message}</p>`;
+            })
+            .finally(() => {
+                // Завжди повертаємо кнопку в активний стан
+                fetchBtn.disabled = false;
+            });
+    }
     </script>
+
 </body>
 </html>

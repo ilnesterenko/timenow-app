@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./backend
+    container_name: timenow-backend-container
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    container_name: timenow-nginx-container
+    ports:
+      - "8000:80"   # Магія! Зовнішній порт 8000 веде на 80 порт контейнера
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./nginx/timenow.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+    restart: always
