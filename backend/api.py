@@ -1,8 +1,10 @@
 from flask import Flask
+from flask_cors import CORS
 from datetime import datetime
 from zoneinfo import ZoneInfo # Імпортуємо роботу з часовими поясами
 
 app = Flask(__name__)  
+CORS(app)
 
 @app.route('/api/time', methods=['GET'])
 def get_time():
